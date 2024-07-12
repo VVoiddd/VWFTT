@@ -1,0 +1,3 @@
+@echo off
+echo Starting VWPTPFTT...
+python app.py
