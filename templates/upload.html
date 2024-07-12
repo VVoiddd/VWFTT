@@ -1,9 +1,19 @@
+<!-- upload.html -->
 {% extends 'base.html' %}
 
 {% block content %}
     <div class="card">
         <div class="card-body">
             <h5 class="card-title text-center">File Upload</h5>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             <form id="uploadForm" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="file">Select File:</label>
@@ -25,27 +35,4 @@
             </form>
         </div>
     </div>
-
-    <div id="loader" class="text-center mt-4" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
-    </div>
-
-    <div id="notification" class="notification"></div>
-
-    <table class="table table-striped mt-4">
-        <thead>
-            <tr>
-                <th scope="col">Filename</th>
-                <th scope="col">Uploaded At</th>
-                <th scope="col">Uploaded By</th>
-            </tr>
-        </thead>
-        <tbody id="file-list">
-            <!-- Files will be dynamically added here -->
-        </tbody>
-    </table>
-
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 {% endblock %}

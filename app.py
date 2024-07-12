@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template, jsonify, session
+from flask import Flask, request, redirect, url_for, render_template, jsonify, session, flash
 import os
 import datetime
 import hashlib
@@ -68,9 +68,11 @@ def login():
         users = load_users()
         if email in users and users[email]['password'] == password:
             session['username'] = users[email]['username']
+            flash('Login successful!', 'success')
             return redirect(url_for('upload_file'))
         else:
-            return 'Invalid credentials'
+            flash('Invalid credentials. Please try again.', 'danger')
+            return render_template('login.html')
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -81,20 +83,24 @@ def signup():
         password = request.form['password']
         users = load_users()
         if email in users:
-            return 'Email already registered'
+            flash('Email already registered. Please login or use a different email.', 'warning')
+            return redirect(url_for('login'))
         users[email] = {'username': username, 'password': hash_password(password)}
         save_users(users)
+        flash('Sign up successful! Please login.', 'success')
         return redirect(url_for('login'))
     return render_template('signup.html')
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    flash('Logged out successfully.', 'info')
     return redirect(url_for('login'))
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if 'username' not in session:
+        flash('Please login to access this page.', 'warning')
         return redirect(url_for('login'))
     
     if request.method == 'POST':
@@ -103,14 +109,17 @@ def upload_file():
         password = request.form['password']
         
         if ip != SERVER_IP or port != SERVER_PORT or password != PASSWORD:
-            return 'Invalid credentials'
+            flash('Invalid credentials. Please try again.', 'danger')
+            return render_template('upload.html')
         
         if 'file' not in request.files:
-            return 'No file part'
+            flash('No file part.', 'danger')
+            return render_template('upload.html')
         
         file = request.files['file']
         if file.filename == '':
-            return 'No selected file'
+            flash('No selected file.', 'danger')
+            return render_template('upload.html')
         
         if file and allowed_file(file.filename):
             filename = file.filename
@@ -124,7 +133,8 @@ def upload_file():
             })
             save_upload_log(log)
             
-            return 'File successfully uploaded'
+            flash('File successfully uploaded.', 'success')
+            return redirect(url_for('upload_file'))
     
     return render_template('upload.html')
 
