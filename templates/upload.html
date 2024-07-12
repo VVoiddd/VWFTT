@@ -1,76 +1,138 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VWPTPFTT - Upload MP4</title>
+  <title>Upload MP4</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     body {
-      background-color: #1a1a1a;
-      color: #fff;
-      padding: 20px;
+      background-color: #121212;
+      color: #ffffff;
     }
-    form {
-      max-width: 600px;
-      margin: auto;
+    .form-control, .btn-primary {
+      background-color: #333333;
+      border: none;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: #555555;
     }
     .recent-files {
-      margin-top: 20px;
+      margin-top: 30px;
     }
-    .recent-files table {
+    .notification {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+      padding: 15px;
+      background-color: rgba(0, 128, 0, 0.8);
+      color: white;
+      text-align: center;
+      z-index: 1000;
+      animation: slide-down 0.5s ease-out forwards;
     }
-    .recent-files th, .recent-files td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
+    @keyframes slide-down {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+    .loader {
+      display: none;
+      border: 8px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 8px solid #3498db;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <h1 class="text-center">VWPTPFTT - Upload MP4 File</h1>
-  <form method="post" enctype="multipart/form-data">
-    <label for="server_ip">Server IP:</label>
-    <input type="text" id="server_ip" name="server_ip" value="192.168.68.101" required class="form-control"><br><br>
-    <label for="server_port">Server Port:</label>
-    <input type="text" id="server_port" name="server_port" value="5000" required class="form-control"><br><br>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" value="your_password" required class="form-control"><br><br>
-    <input type="file" name="file" id="file" class="form-control">
-    <input type="submit" value="Upload" class="btn btn-primary mt-3">
-  </form>
-  <div class="recent-files">
-    <h2>Recently Transferred Files</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Filename</th>
-          <th>Uploaded At</th>
-          <th>Uploaded By</th>
-        </tr>
-      </thead>
-      <tbody id="file-list">
-      </tbody>
-    </table>
+  <div class="container mt-5">
+    <h1 class="text-center">Upload MP4 File</h1>
+    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+      <label for="server_ip">Server IP:</label>
+      <input type="text" id="server_ip" name="server_ip" value="192.168.68.101" required class="form-control"><br><br>
+      <label for="server_port">Server Port:</label>
+      <input type="text" id="server_port" name="server_port" value="5000" required class="form-control"><br><br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" value="your_password" required class="form-control"><br><br>
+      <input type="file" name="file" id="file" class="form-control">
+      <input type="submit" value="Upload" class="btn btn-primary mt-3">
+    </form>
+    <div class="loader" id="loader"></div>
+    <div class="notification" id="notification">File successfully uploaded</div>
+    <div class="recent-files">
+      <h2>Recently Transferred Files</h2>
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Uploaded At</th>
+            <th>Uploaded By</th>
+          </tr>
+        </thead>
+        <tbody id="file-list">
+        </tbody>
+      </table>
+    </div>
   </div>
   <script>
-    fetch('/recent_files')
-      .then(response => response.json())
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      document.getElementById('loader').style.display = 'block';
+      
+      const formData = new FormData(this);
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      }).then(response => response.text())
       .then(data => {
-        const fileList = document.getElementById('file-list');
-        data.forEach(file => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${file.filename}</td>
-            <td>${file.uploaded_at}</td>
-            <td>${file.uploaded_by}</td>
-          `;
-          fileList.appendChild(row);
-        });
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('notification').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('notification').style.display = 'none';
+        }, 3000);
+        fetchRecentFiles();
+      }).catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loader').style.display = 'none';
       });
+    });
+
+    function fetchRecentFiles() {
+      fetch('/recent_files')
+        .then(response => response.json())
+        .then(data => {
+          const fileList = document.getElementById('file-list');
+          fileList.innerHTML = '';
+          data.forEach(file => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${file.filename}</td>
+              <td>${file.uploaded_at}</td>
+              <td>${file.uploaded_by}</td>
+            `;
+            fileList.appendChild(row);
+          });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchRecentFiles);
   </script>
 </body>
 </html>
