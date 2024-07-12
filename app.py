@@ -6,13 +6,14 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'mp4'}
-SERVER_IP = 'IP'
+SERVER_IP = '0.0.0.0'
 SERVER_PORT = '5000'
-PASSWORD = 'your_password'
-USERS_FILE = 'users.json'  # File to store user info
-UPLOAD_LOG = 'upload_log.json'  # File to store upload log
+PASSWORD = 'MegaGay1213'
+USERS_FILE = 'users.json'
+UPLOAD_LOG = 'upload_log.json'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -56,7 +57,8 @@ def allowed_file(filename):
 def index():
     if 'username' in session:
         return redirect(url_for('upload_file'))
-    return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -94,29 +96,36 @@ def logout():
 def upload_file():
     if 'username' not in session:
         return redirect(url_for('login'))
+    
     if request.method == 'POST':
         ip = request.form['server_ip']
         port = request.form['server_port']
         password = request.form['password']
-        if ip == SERVER_IP and port == SERVER_PORT and password == PASSWORD:
-            if 'file' not in request.files:
-                return 'No file part'
-            file = request.files['file']
-            if file.filename == '':
-                return 'No selected file'
-            if file and allowed_file(file.filename):
-                filename = file.filename
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                log = load_upload_log()
-                log.append({
-                    'filename': filename,
-                    'uploaded_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'uploaded_by': session['username']
-                })
-                save_upload_log(log)
-                return 'File successfully uploaded'
-        else:
+        
+        if ip != SERVER_IP or port != SERVER_PORT or password != PASSWORD:
             return 'Invalid credentials'
+        
+        if 'file' not in request.files:
+            return 'No file part'
+        
+        file = request.files['file']
+        if file.filename == '':
+            return 'No selected file'
+        
+        if file and allowed_file(file.filename):
+            filename = file.filename
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            log = load_upload_log()
+            log.append({
+                'filename': filename,
+                'uploaded_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'uploaded_by': session['username']
+            })
+            save_upload_log(log)
+            
+            return 'File successfully uploaded'
+    
     return render_template('upload.html')
 
 @app.route('/recent_files', methods=['GET'])
