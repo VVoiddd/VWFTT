@@ -1,7 +1,7 @@
 # VWPTPFTT (VoidWare-Peer-To-Peer-File-Transfer-Tool)
 
 ## Overview
-VWPTPFTT is a peer-to-peer file transfer ( I just needed a name for it ) tool that allows users to upload MP4 files securely to a server. The tool provides a web interface for users to sign up, log in, and upload files. The uploads are stored in a directory, and the tool lists recently transferred files with details like the filename, upload time, and the uploader's username.
+VWPTPFTT is a peer-to-peer file transfer tool that allows users to upload MP4 files securely to a server. The tool provides a web interface for users to sign up, log in, and upload files. The uploads are stored in a directory, and the tool lists recently transferred files with details like the filename, upload time, and the uploader's username.
 
 ## Features
 - User registration and login with secure password hashing.
@@ -44,7 +44,7 @@ VWPTPFTT is a peer-to-peer file transfer ( I just needed a name for it ) tool th
     ```
 
 ## Usage
-- Open your web browser and navigate to `http://IP:5000/`.
+- Open your web browser and navigate to `http://192.168.68.101:5000/`.
 - Sign up for a new account or log in with an existing account.
 - Upload MP4 files using the provided form.
 - View the list of recently transferred files on the upload page.
