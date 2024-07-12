@@ -1,28 +1,103 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title text-center">File Upload</h5>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
-            {{ message }}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title text-center">File Upload</h5>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Select File:</label>
+                    <input type="file" id="file" name="file" class="form-control-file">
+                </div>
+                <div class="form-group">
+                    <label for="server_ip">Server IP:</label>
+                    <input type="text" id="server_ip" name="server_ip" value="192.168.68.101" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="server_port">Server Port:</label>
+                    <input type="text" id="server_port" name="server_port" value="5000" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
         </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        <form id="uploadForm" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="file">Select File:</label>
-                <input type="file" id="file" name="file" class="form-control-file">
-            </div>
-            <button type="button" id="uploadButton" class="btn btn-primary">Upload</button>
-        </form>
     </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
-<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <!-- WebRTC Setup -->
+    <script>
+        const socket = io.connect('http://YOURIP:5000');  // Replace with your server details
+
+        socket.on('connect', () => {
+            console.log('Connected to server via WebRTC.');
+        });
+
+        socket.on('file_received', (filename) => {
+            showNotification(`File ${filename} received successfully.`, 'success');
+            refreshFileList();
+        });
+
+        function refreshFileList() {
+            $.ajax({
+                url: '/recent_files',
+                type: 'GET',
+                success: function(data) {
+                    $('#file-list').empty();
+                    data.forEach(function(file) {
+                        var row = $('<tr>');
+                        row.append($('<td>').text(file.filename));
+                        row.append($('<td>').text(file.uploaded_at));
+                        row.append($('<td>').text(file.uploaded_by));
+                        $('#file-list').append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching recent files:', error);
+                }
+            });
+        }
+
+        function showNotification(message, type) {
+            var notification = $('#notification');
+            notification.text(message).removeClass().addClass('notification alert alert-' + type);
+            notification.slideDown().delay(3000).slideUp();
+        }
+
+        $('#uploadForm').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            
+            $('#loader').show();
+            
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                success: function(data) {
+                    $('#loader').hide();
+                    showNotification('File successfully uploaded', 'success');
+                    $('#file').val('');
+                    refreshFileList();
+                },
+                error: function(xhr, status, error) {
+                    $('#loader').hide();
+                    showNotification('Error uploading file: ' + error, 'danger');
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+    </script>
 {% endblock %}
