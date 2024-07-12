@@ -38,37 +38,39 @@
     <label for="server_port">Server Port:</label>
     <input type="text" id="server_port" name="server_port" value="5000" required class="form-control"><br><br>
     <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required class="form-control"><br><br>
-    <label for="file">Select MP4 File:</label>
-    <input type="file" id="file" name="file" accept=".mp4" required class="form-control"><br><br>
-    <input type="submit" value="Upload" class="btn btn-primary">
+    <input type="password" id="password" name="password" value="your_password" required class="form-control"><br><br>
+    <input type="file" name="file" id="file" class="form-control">
+    <input type="submit" value="Upload" class="btn btn-primary mt-3">
   </form>
-  
   <div class="recent-files">
     <h2>Recently Transferred Files</h2>
-    <table class="table table-striped">
+    <table>
       <thead>
         <tr>
           <th>Filename</th>
           <th>Uploaded At</th>
+          <th>Uploaded By</th>
         </tr>
       </thead>
-      <tbody id="files-list">
-        <!-- Files will be listed here dynamically -->
+      <tbody id="file-list">
       </tbody>
     </table>
   </div>
-
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script>
-    $(document).ready(function() {
-      $.get('/recent_files', function(data) {
-        data.forEach(function(file) {
-          var row = `<tr><td>${file.filename}</td><td>${file.uploaded_at}</td></tr>`;
-          $('#files-list').append(row);
+    fetch('/recent_files')
+      .then(response => response.json())
+      .then(data => {
+        const fileList = document.getElementById('file-list');
+        data.forEach(file => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${file.filename}</td>
+            <td>${file.uploaded_at}</td>
+            <td>${file.uploaded_by}</td>
+          `;
+          fileList.appendChild(row);
         });
       });
-    });
   </script>
 </body>
 </html>
