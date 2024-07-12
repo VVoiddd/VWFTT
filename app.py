@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'mp4'}
+ALLOWED_EXTENSIONS = {'mp4', 'jpg', 'jpeg', 'png', 'mp3', 'mkv'}  # Updated allowed extensions
 SERVER_IP = '0.0.0.0'
 SERVER_PORT = '5000'
 PASSWORD = 'MegaGay1213'
@@ -135,6 +135,9 @@ def upload_file():
             
             flash('File successfully uploaded.', 'success')
             return redirect(url_for('upload_file'))
+        else:
+            flash('File type not allowed.', 'danger')
+            return render_template('upload.html')
     
     return render_template('upload.html')
 
