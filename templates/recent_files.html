@@ -18,17 +18,11 @@
                     <th scope="col">Uploaded At</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for entry in log %}
-                <tr>
-                    <th scope="row">{{ loop.index }}</th>
-                    <td>{{ entry.filename }}</td>
-                    <td>{{ entry.uploaded_by }}</td>
-                    <td>{{ entry.uploaded_at }}</td>
-                </tr>
-                {% endfor %}
+            <tbody id="file-list">
+                <!-- Recent files will be populated here -->
             </tbody>
         </table>
     </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

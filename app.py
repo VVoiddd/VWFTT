@@ -97,49 +97,28 @@ def logout():
     flash('Logged out successfully.', 'info')
     return redirect(url_for('login'))
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
     if 'username' not in session:
         flash('Please login to access this page.', 'warning')
         return redirect(url_for('login'))
     
-    if request.method == 'POST':
-        ip = request.form['server_ip']
-        port = request.form['server_port']
-        password = request.form['password']
+    file = request.files['file']
+    if file and allowed_file(file.filename):
+        filename = file.filename
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
-        if ip != SERVER_IP or port != SERVER_PORT or password != PASSWORD:
-            flash('Invalid credentials. Please try again.', 'danger')
-            return render_template('upload.html')
+        log = load_upload_log()
+        log.append({
+            'filename': filename,
+            'uploaded_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'uploaded_by': session['username']
+        })
+        save_upload_log(log)
         
-        if 'file' not in request.files:
-            flash('No file part.', 'danger')
-            return render_template('upload.html')
-        
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file.', 'danger')
-            return render_template('upload.html')
-        
-        if file and allowed_file(file.filename):
-            filename = file.filename
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
-            log = load_upload_log()
-            log.append({
-                'filename': filename,
-                'uploaded_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'uploaded_by': session['username']
-            })
-            save_upload_log(log)
-            
-            flash('File successfully uploaded.', 'success')
-            return redirect(url_for('upload_file'))
-        else:
-            flash('File type not allowed.', 'danger')
-            return render_template('upload.html')
-    
-    return render_template('upload.html')
+        return jsonify({'message': 'File successfully uploaded'})
+    else:
+        return jsonify({'error': 'File type not allowed'}), 400
 
 @app.route('/recent_files', methods=['GET'])
 def recent_files():
