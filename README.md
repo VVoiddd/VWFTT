@@ -44,7 +44,7 @@ VWPTPFTT is a peer-to-peer file transfer tool that allows users to upload MP4 fi
     ```
 
 ## Usage
-- Open your web browser and navigate to `http://192.168.68.101:5000/`.
+- Open your web browser and navigate to `http://YourIP:5000/`.
 - Sign up for a new account or log in with an existing account.
 - Upload MP4 files using the provided form.
 - View the list of recently transferred files on the upload page.
