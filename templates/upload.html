@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VWPTPFTT - Upload MP4</title>
+</head>
+<body>
+  <h1>VWPTPFTT - Upload MP4 File</h1>
+  <form method="post" enctype="multipart/form-data">
+    <label for="server_ip">Server IP:</label>
+    <input type="text" id="server_ip" name="server_ip" value="192.168.68.101" required><br><br>
+    <label for="server_port">Server Port:</label>
+    <input type="text" id="server_port" name="server_port" value="5000" required><br><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    <label for="file">Select MP4 File:</label>
+    <input type="file" id="file" name="file" accept=".mp4" required><br><br>
+    <input type="submit" value="Upload">
+  </form>
+</body>
+</html>
