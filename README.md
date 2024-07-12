@@ -15,7 +15,7 @@ VWPTPFTT is a simple tool for securely transferring MP4 files over the network. 
 2. Ensure Python 3.x is installed.
 3. Install dependencies: `pip install flask`.
 4. Run the application: `python app.py`.
-5. Access the application via `http://192.168.68.101:5000`.
+5. Access the application via `http://YourIP:YourPort`.
 
 ## Usage
 
