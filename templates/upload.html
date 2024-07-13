@@ -32,20 +32,40 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Upload</button>
             </form>
+            
+            <!-- Recent Files Table -->
+            <div class="mt-4">
+                <h5>Recent Files</h5>
+                <table id="file-list" class="table">
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Uploaded At</th>
+                            <th>Uploaded By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- File list will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- WebRTC Setup -->
+    <!-- WebRTC Setup and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script>
-        const socket = io.connect('http://YOURIP:5000');  // Replace with your server details
+        const socket = io.connect('http://192.168.68.101:5000');  // Replace with your server details
 
         socket.on('connect', () => {
             console.log('Connected to server via WebRTC.');
+            refreshFileList();  // Load recent files on connect
         });
 
         socket.on('file_received', (filename) => {
             showNotification(`File ${filename} received successfully.`, 'success');
-            refreshFileList();
+            refreshFileList();  // Refresh file list on new file received
         });
 
         function refreshFileList() {
@@ -53,13 +73,13 @@
                 url: '/recent_files',
                 type: 'GET',
                 success: function(data) {
-                    $('#file-list').empty();
+                    $('#file-list tbody').empty();  // Clear existing rows
                     data.forEach(function(file) {
                         var row = $('<tr>');
                         row.append($('<td>').text(file.filename));
                         row.append($('<td>').text(file.uploaded_at));
                         row.append($('<td>').text(file.uploaded_by));
-                        $('#file-list').append(row);
+                        $('#file-list tbody').append(row);  // Append new row
                     });
                 },
                 error: function(xhr, status, error) {
@@ -88,7 +108,7 @@
                     $('#loader').hide();
                     showNotification('File successfully uploaded', 'success');
                     $('#file').val('');
-                    refreshFileList();
+                    refreshFileList();  // Refresh file list after upload
                 },
                 error: function(xhr, status, error) {
                     $('#loader').hide();
